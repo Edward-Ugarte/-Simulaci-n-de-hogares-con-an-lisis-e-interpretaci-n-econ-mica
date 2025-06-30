@@ -1,0 +1,247 @@
+versión de Gretl 2025b
+Sesión actual: 2025-06-29 22:56
+
+# PROYECTO: Simulación de hogares con análisis e interpretación económica
+# AUTOR: Edward Ugarte | FECHA: 2025-06-28 | VERSIÓN: Gretl 2025b
+? clear
+? nulldata 500
+periodicidad: 1, máx. obs: 500
+rango de observaciones: 1 a 500
+? set seed 2025
+Generador de números pseudoaleatorios iniciado con semilla 2025
+# 🔧 Generación de datos sintéticos
+? series base_media  = 
+Se ha generado la serie base_media (ID 2)
+? series ingresos    = 
+Se ha generado la serie ingresos (ID 3)
+? series deuda       = 
+Se ha generado la serie deuda (ID 4)
+? series nmiembros   = 
+Se ha generado la serie nmiembros (ID 5)
+? series edad_jefe   = 
+Se ha generado la serie edad_jefe (ID 6)
+? series u = 
+Se ha generado la serie u (ID 7)
+? series educacion = 
+? series ingresos = 
+Se ha reemplazado la serie ingresos (ID 3)
+? series consumo = 
+Se ha generado la serie consumo (ID 9)
+? series formalidad = 
+Se ha generado la serie formalidad (ID 10)
+# 🧮 Ahorro
+? series ahorro       = 
+Se ha generado la serie ahorro (ID 11)
+? series tasa_ahorro  = 
+Se ha generado la serie tasa_ahorro (ID 12)
+# 📊 Resumen laboral
+? scalar n_formal   = 
+Se ha generado el escalar n_formal = 215
+? scalar n_informal = 
+Se ha generado el escalar n_informal = 285
+
+👔 Distribución laboral:
+• Formales: 215
+• Informales: 285
+# 📈 MODELO 1 – Regresión en niveles
+
+📌 Modelo 1 – Regresión en niveles:
+? ols consumo const ingresos deuda nmiembros formalidad
+
+Modelo 1: MCO, usando las observaciones 1-500
+Variable dependiente: consumo
+
+              coeficiente   Desv. típica  Estadístico t  valor p
+  --------------------------------------------------------------
+  const       47.0311       19.7836           2.377      0.0178  **
+  ingresos     0.710777      0.00461004     154.2        0.0000  ***
+  deuda        0.000102119   0.000488284      0.2091     0.8344 
+  nmiembros   −0.175067      2.47362         −0.07077    0.9436 
+  formalidad   1.12592       5.60899          0.2007     0.8410 
+
+Media de la vble. dep.  2054.205   D.T. de la vble. dep.   433.9641
+Suma de cuad. residuos   1902237   D.T. de la regresión    61.99115
+R-cuadrado              0.979758   R-cuadrado corregido    0.979594
+F(4, 495)               5989.734   Valor p (de F)          0.000000
+Log-verosimilitud      −2770.452   Criterio de Akaike      5550.905
+Criterio de Schwarz     5571.978   Crit. de Hannan-Quinn   5559.174
+
+Sin considerar la constante, el valor p más alto fue el de la variable 5 (nmiembros)
+
+? scalar gl1 = $df
+Se ha generado el escalar gl1 = 495
+? scalar b_ing  = $coeff[2]
+Se ha generado el escalar b_ing = 0.710777
+? scalar se_ing = $stderr[2]
+Se ha generado el escalar se_ing = 0.00461004
+? scalar p_ing  = 2 * (1 - cdf("t", abs(b_ing / se_ing), gl1))
+Se ha generado el escalar p_ing = 0
+? scalar b_deu  = $coeff[3]
+Se ha generado el escalar b_deu = 0.000102119
+? scalar se_deu = $stderr[3]
+Se ha generado el escalar se_deu = 0.000488284
+? scalar p_deu  = 2 * (1 - cdf("t", abs(b_deu / se_deu), gl1))
+Se ha generado el escalar p_deu = 0.203807
+? scalar b_nmi  = $coeff[4]
+Se ha generado el escalar b_nmi = -0.175067
+? scalar se_nmi = $stderr[4]
+Se ha generado el escalar se_nmi = 2.47362
+? scalar p_nmi  = 2 * (1 - cdf("t", abs(b_nmi / se_nmi), gl1))
+Se ha generado el escalar p_nmi = 0.559938
+? scalar b_form  = $coeff[5]
+Se ha generado el escalar b_form = 1.12592
+? scalar se_form = $stderr[5]
+Se ha generado el escalar se_form = 5.60899
+? scalar p_form  = 2 * (1 - cdf("t", abs(b_form / se_form), gl1))
+Se ha generado el escalar p_form = 0.216252
+
+💬 Interpretación – Modelo 1:
+• Ingreso: 0.711 (p = 0.0000) → cada sol adicional eleva el consumo en 0.711 soles
+• Deuda: 0.000102 (p = 0.2038) → no significativa
+• N. miembros: -0.175 (p = 0.5599)
+• Formalidad: 1.126 (p = 0.2163) → sin evidencia clara
+# 📉 MODELO 2 – Regresión log-log
+? series log_valida = (ingresos > 0) * (consumo > 0)
+Se ha generado la serie log_valida (ID 13)
+? smpl (log_valida > 0) --restrict
+Rango de datos completo: 1 - 500 (n = 500)
+
+? series log_ing = log(ingresos)
+Se ha generado la serie log_ing (ID 14)
+? series log_con = log(consumo)
+Se ha generado la serie log_con (ID 15)
+
+📌 Modelo 2 – Regresión log-log:
+? ols log_con const log_ing deuda nmiembros formalidad
+
+Modelo 2: MCO, usando las observaciones 1-500
+Variable dependiente: log_con
+
+              coeficiente   Desv. típica  Estadístico t  valor p
+  --------------------------------------------------------------
+  const       −0.158955     0.0464838        −3.420      0.0007  ***
+  log_ing      0.980076     0.00576207      170.1        0.0000  ***
+  deuda        7.45400e-08  2.32567e-07       0.3205     0.7487 
+  nmiembros   −0.000355928  0.00117673       −0.3025     0.7624 
+  formalidad   0.000529393  0.00267162        0.1982     0.8430 
+
+Media de la vble. dep.  7.603390   D.T. de la vble. dep.   0.227365
+Suma de cuad. residuos  0.431539   D.T. de la regresión    0.029526
+R-cuadrado              0.983271   R-cuadrado corregido    0.983136
+F(4, 495)               7273.566   Valor p (de F)          0.000000
+Log-verosimilitud       1054.282   Criterio de Akaike     −2098.564
+Criterio de Schwarz    −2077.491   Crit. de Hannan-Quinn  −2090.295
+
+Log-verosimilitud para consumo = −2747.41
+
+Sin considerar la constante, el valor p más alto fue el de la variable 10 (formalidad)
+
+? scalar gl2 = $df
+Se ha generado el escalar gl2 = 495
+? scalar b_log_ing  = $coeff[2]
+Se ha generado el escalar b_log_ing = 0.980076
+? scalar se_log_ing = $stderr[2]
+Se ha generado el escalar se_log_ing = 0.00576207
+? scalar p_log_ing  = 2 * (1 - cdf("t", abs(b_log_ing / se_log_ing), gl2))
+Se ha generado el escalar p_log_ing = 0
+
+💬 Interpretación – Modelo 2:
+• Elasticidad ingreso–consumo: 0.980 (p = 0.0000)
+→ Un aumento de 1% en ingreso implica 98.01% más de consumo
+? smpl --full
+Rango de datos completo: 1 - 500 (n = 500)
+
+# 🧍 MODELO 3 – Hogares formales
+? if n_formal > 30
+? smpl formalidad != 0 --restrict
+Conjunto de datos completo: 500 observaciones
+Muestra actual: 215 observaciones
+
+📂 Modelo 3 – Hogares formales:
+? ols consumo const ingresos
+
+Modelo 3: MCO, usando las observaciones 1-215
+Variable dependiente: consumo
+
+             coeficiente   Desv. típica   Estadístico t    valor p 
+  -----------------------------------------------------------------
+  const       58.2623      21.5392            2.705       0.0074    ***
+  ingresos     0.707474     0.00744225       95.06        2.10e-176 ***
+
+Media de la vble. dep.  2063.155   D.T. de la vble. dep.   421.6518
+Suma de cuad. residuos  876135.4   D.T. de la regresión    64.13511
+R-cuadrado              0.976972   R-cuadrado corregido    0.976864
+F(1, 213)               9036.752   Valor p (de F)          2.1e-176
+Log-verosimilitud      −1198.680   Criterio de Akaike      2401.361
+Criterio de Schwarz     2408.102   Crit. de Hannan-Quinn   2404.085
+
+? scalar gl3 = $df
+Se ha generado el escalar gl3 = 213
+? scalar b_ing3  = $coeff[2]
+Se ha generado el escalar b_ing3 = 0.707474
+? scalar se_ing3 = $stderr[2]
+Se ha generado el escalar se_ing3 = 0.00744225
+? scalar p_ing3  = 2 * (1 - cdf("t", abs(b_ing3 / se_ing3), gl3))
+Se ha generado el escalar p_ing3 = 0
+
+💬 Interpretación – Modelo 3:
+• Ingreso: 0.707 (p = 0.0000) → efecto estable en hogares formales
+? smpl --full
+Rango de datos completo: 1 - 500 (n = 500)
+
+? endif
+# 👥 MODELO 4 – Hogares informales
+? if n_informal > 30
+? smpl formalidad == 0 --restrict
+Conjunto de datos completo: 500 observaciones
+Muestra actual: 285 observaciones
+
+📂 Modelo 4 – Hogares informales:
+? ols consumo const ingresos
+
+Modelo 4: MCO, usando las observaciones 1-285
+Variable dependiente: consumo
+
+             coeficiente   Desv. típica   Estadístico t    valor p 
+  -----------------------------------------------------------------
+  const       41.1721      16.6844             2.468      0.0142    **
+  ingresos     0.713099     0.00579326       123.1        8.63e-248 ***
+
+Media de la vble. dep.  2047.454   D.T. de la vble. dep.   443.6435
+Suma de cuad. residuos   1024903   D.T. de la regresión    60.17944
+R-cuadrado              0.981664   R-cuadrado corregido    0.981600
+F(1, 283)               15151.42   Valor p (de F)          8.6e-248
+Log-verosimilitud      −1571.133   Criterio de Akaike      3146.266
+Criterio de Schwarz     3153.571   Crit. de Hannan-Quinn   3149.195
+
+? scalar gl4 = $df
+Se ha generado el escalar gl4 = 283
+? scalar b_ing4  = $coeff[2]
+Se ha generado el escalar b_ing4 = 0.713099
+? scalar se_ing4 = $stderr[2]
+Se ha generado el escalar se_ing4 = 0.00579326
+? scalar p_ing4  = 2 * (1 - cdf("t", abs(b_ing4 / se_ing4), gl4))
+Se ha generado el escalar p_ing4 = 0
+
+💬 Interpretación – Modelo 4:
+• Ingreso: 0.713 (p = 0.0000) → comportamiento consistente en hogares informales
+? smpl --full
+Rango de datos completo: 1 - 500 (n = 500)
+
+? endif
+# 🎓 Tasa de ahorro por educación
+? scalar promedio0 = mean(tasa_ahorro, educacion == 0)
+Se ha generado el escalar promedio0 = 27.1386
+? scalar promedio1 = mean(tasa_ahorro, educacion == 1)
+Se ha generado el escalar promedio1 = 27.1386
+? scalar promedio2 = mean(tasa_ahorro, educacion == 2)
+Se ha generado el escalar promedio2 = 27.1386
+
+🎓 Tasa de ahorro promedio:
+• Primaria:   27.14%
+• Secundaria: 27.14%
+• Superior:   27.14%
+→ Mayor educación está asociada con mayor ahorro relativo
+# 🧾 Exportación CSV
+? outfile "tasas_ahorro_resumen.csv"
+Escribiendo los resultados en 'C:\Users\User\User\Documentos\gretl\tasas_ahorro_resumen.csv'
