@@ -1,4 +1,4 @@
-# -Simulacin-de-hogares-con-anlisis-e-interpretacin-econmica
+# -Simulacion-de-hogares-con-analisis-e-interpretacin-econmica
 # 🏡 Simulación de Hogares y Análisis Económico
 
 **Autor**: Edward Ugarte  
